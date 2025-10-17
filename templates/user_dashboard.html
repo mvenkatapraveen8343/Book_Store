@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block sidebar_links %}
+<a href="/home">Home</a>
+<a href="/shopping_cart/{{ user_id }}">Shopping Cart</a>
+<a href="/user_login">Log out</a>
+<button type="button" onclick="toggleSidebar()">Close</button>
+{% endblock %}
+
+{% block content %}
+<main class="book-container">
+    {% for book in products %}
+    <div class="book-card">
+        <img src="data:image/jpeg;base64,{{ book[2] }}" alt="{{ book[1] }}">
+        <h3>{{ book[1] }}</h3>
+        <p>Genre: {{ book[3] }}</p>
+        <p class="price">
+            Actual Price: {{ book[4] }}/-
+        </p>
+        {% if book[5] %}
+        <p class="discounted">Discounted Price: {{ book[5] }}/-</p>
+        {% endif %}
+        <p class="stock">Stock: {{ book[6] }}</p>
+        {% if book[6] > 0 %}
+        <a href="/add_to_cart/{{ book[0] }}" class="add-to-cart-link">
+            <button>Add to Cart</button>
+        </a>
+        {% else %}
+        <button disabled>Out of Stock</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.querySelectorAll('.add-to-cart-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const card = this.closest('.book-card');
+            const stockElement = card.querySelector('.stock');
+            const button = this.querySelector('button');
+
+            // Optimistically update UI immediately
+            let currentStock = parseInt(stockElement.textContent.replace('Stock: ', ''));
+            if (currentStock > 0) {
+                currentStock -= 1;
+                stockElement.textContent = 'Stock: ' + currentStock;
+                if (currentStock <= 0) {
+                    button.disabled = true;
+                    button.textContent = 'Out of Stock';
+                }
+            }
+
+            // Send AJAX request to server to update stock in database
+            fetch(this.href, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        stockElement.textContent = 'Stock: ' + data.stock;
+                        if (data.stock <= 0) {
+                            button.disabled = true;
+                            button.textContent = 'Out of Stock';
+                        }
+                    } else {
+                        alert(data.error || 'Failed to update stock');
+                        // revert UI
+                        currentStock += 1;
+                        stockElement.textContent = 'Stock: ' + currentStock;
+                        button.disabled = false;
+                        button.textContent = 'Add to Cart';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    // revert UI
+                    currentStock += 1;
+                    stockElement.textContent = 'Stock: ' + currentStock;
+                    button.disabled = false;
+                    button.textContent = 'Add to Cart';
+                });
+        });
+    });
+</script>
+{% endblock %}

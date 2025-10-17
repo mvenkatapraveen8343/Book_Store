@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Message{% endblock %}
+
+{% block sidebar_links %}
+<a href="/home">Home</a>
+<button type="button" onclick="toggleSidebar()">Close</button>
+{% endblock %}
+
+{% block content %}
+<div class="message-box">
+    <p>{{ message }}</p>
+</div>
+{% endblock %}

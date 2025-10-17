@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block sidebar_links %}
+<a href="/home">Home</a>
+<a href="/add_products">Add Products</a>
+<a href="/manage_products">Manage Products</a>
+<a href="/admin_logout">Logout</a>
+<button type="button" onclick="toggleSidebar()">Close</button>
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to My Book Store</h1>
+<p>Click the menu button to access admin options.</p>
+<img src="{{url_for('static',filename='images/home_image.png')}}" alt="Content Image">
+<p>Explore our platform for amazing features and seamless user experience.</p>
+{% endblock %}

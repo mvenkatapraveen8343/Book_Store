@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('admin_signup') }}">Admin Signup</a>
+<a href="{{ url_for('admin_login') }}">Admin Login</a>
+<a href="{{ url_for('user_signup') }}">User Signup</a>
+<a href="{{ url_for('user_login') }}">User Login</a>
+<button type="button" onclick="toggleSidebar()">Close</button>
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to my Book Store</h1>
+<p>Click the menu button to access login options.</p>
+<img src="{{ url_for('static',filename='images/home_image.png') }}" alt="Content Image" style="width:80%;max-width:600px;margin-top:20px;border-radius:10px;">
+<p>Explore our platform for amazing features and seamless user experience.</p>
+{% endblock %}

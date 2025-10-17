@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="./static/images/logo.png" />
+    <title>{% block title %}My Web App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+</head>
+
+<body>
+    <header>
+        <a href="{{ url_for('home') }}" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            <span>Find Your Book</span>
+        </a>
+        <button class="menu-btn" onclick="toggleSidebar()">☰ Menu</button>
+    </header>
+
+    <div id="sidebar" class="sidebar">
+        {% block sidebar_links %}
+        <a href="{{ url_for('home') }}">Home</a>
+        <button type="button" onclick="toggleSidebar()">Close</button>
+        {% endblock %}
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>Contact: support@example.com | &copy; 2025 My Web App</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            sidebar.style.left = (sidebar.style.left === "0px") ? "-250px" : "0px";
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
