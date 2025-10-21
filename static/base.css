@@ -359,6 +359,53 @@ select {
     background: #575757;
 }
 
+.reset-password-container {
+    position: relative;
+    left: 570px;
+    top: 60px;
+    background: white;
+    padding: 50px 30px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.reset-password-container h2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.reset-password-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.reset-password-container button {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.reset-password-container button:hover {
+    background: #575757;
+}
+
+.reset-password-container p {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+
 .book-container {
     flex: 1;
     display: flex;
@@ -431,6 +478,25 @@ select {
 .book-card button:disabled {
     background: #999;
     cursor: not-allowed;
+}
+
+.empty {
+    width: 500px;
+    height: 120px;
+    margin: 200px auto 0 auto;
+    padding: 20px;
+    padding-top: 35px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    text-align: center;
+    color: #555;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.empty p {
+    margin: 5px;
 }
 
 .cart-container {

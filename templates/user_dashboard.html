@@ -11,27 +11,34 @@
 
 {% block content %}
 <main class="book-container">
-    {% for book in products %}
-    <div class="book-card">
-        <img src="data:image/jpeg;base64,{{ book[2] }}" alt="{{ book[1] }}">
-        <h3>{{ book[1] }}</h3>
-        <p>Genre: {{ book[3] }}</p>
-        <p class="price">
-            Actual Price: {{ book[4] }}/-
-        </p>
-        {% if book[5] %}
-        <p class="discounted">Discounted Price: {{ book[5] }}/-</p>
-        {% endif %}
-        <p class="stock">Stock: {{ book[6] }}</p>
-        {% if book[6] > 0 %}
-        <a href="/add_to_cart/{{ book[0] }}" class="add-to-cart-link">
-            <button>Add to Cart</button>
-        </a>
-        {% else %}
-        <button disabled>Out of Stock</button>
-        {% endif %}
+    {% if products %}
+        {% for book in products %}
+        <div class="book-card">
+            <img src="data:image/jpeg;base64,{{ book[2] }}" alt="{{ book[1] }}">
+            <h3>{{ book[1] }}</h3>
+            <p>Genre: {{ book[3] }}</p>
+            <p class="price">
+                Actual Price: {{ book[4] }}/-
+            </p>
+            {% if book[5] %}
+            <p class="discounted">Discounted Price: {{ book[5] }}/-</p>
+            {% endif %}
+            <p class="stock">Stock: {{ book[6] }}</p>
+            {% if book[6] > 0 %}
+            <a href="/add_to_cart/{{ book[0] }}" class="add-to-cart-link">
+                <button>Add to Cart</button>
+            </a>
+            {% else %}
+            <button disabled>Out of Stock</button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty">
+        <p>No products available at the moment.</p>
+        <p>Please check back later or explore other categories.</p>
     </div>
-    {% endfor %}
+    {% endif %}
 </main>
 {% endblock %}
 {% block scripts %}

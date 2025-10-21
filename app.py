@@ -305,6 +305,63 @@ def user_login():
             return render_template('user_login.html', message='Invalid credentials')
     return render_template('user_login.html')
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM Users WHERE Email=%s', (email,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if not user:
+            return render_template('message.html', message="Email not found")
+        
+        otp = str(random.randint(100000, 999999))
+        session['reset_email'] = email
+        session['reset_otp'] = otp
+        send_mail(email, f"Your OTP for password reset: {otp}")
+        
+        return redirect(url_for('reset_password'))
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if 'reset_email' not in session or 'reset_otp' not in session:
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        cotp = request.form.get('cotp')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if cotp != session['reset_otp']:
+            return render_template('message.html', message="Invalid OTP")
+
+        if new_password != confirm_password:
+            return render_template('message.html', message="Passwords do not match")
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE Users SET Password=%s WHERE Email=%s', (new_password, email))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        session.pop('reset_otp', None)
+        session.pop('reset_email', None)
+
+        return render_template('user_login.html', message="Password reset successfully")
+
+    email = session['reset_email']
+    otp = session['reset_otp']
+    return render_template('reset_password.html', email=email, otp=otp)
+
+
 @app.route('/user_dashboard')
 def user_dashboard():
     if 'user_id' not in session:
