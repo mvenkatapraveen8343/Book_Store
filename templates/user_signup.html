@@ -1,24 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}User Signup{% endblock %}
-
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<a href="/admin_login">Admin Login</a>
-<a href="/user_login">User Login</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Create Account - BookHub{% endblock %}
 
 {% block content %}
-<div class="signup-container">
-    <h2>User Signup</h2>
-    <form action="/user_signup" method="POST">
-        <input type="text" name="name" placeholder="Name" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="tel" name="mobile" placeholder="Mobile" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="password" name="cpassword" placeholder="Confirm Password" required>
-        <button type="submit">Next</button>
-    </form>
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Create Your Account</h2>
+                <p>Join thousands of readers on BookHub</p>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('user_signup') }}" method="POST" class="auth-form" id="signupForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name" minlength="2" maxlength="50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile">Mobile Number</label>
+                    <input type="tel" id="mobile" name="mobile" required placeholder="Enter your mobile number" pattern="[0-9]{10}" maxlength="10">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Create a password" minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cpassword">Confirm Password</label>
+                    <input type="password" id="cpassword" name="cpassword" required placeholder="Confirm your password" minlength="6">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{{ url_for('user_login') }}">Sign In</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

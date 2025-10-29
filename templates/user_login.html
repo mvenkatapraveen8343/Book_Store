@@ -1,25 +1,57 @@
 {% extends "base.html" %}
 
-{% block title %}User Login{% endblock %}
-
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<a href="/admin_login">Admin Login</a>
-<a href="/user_signup">User Signup</a>
-<a href="/forgot_password">Forgot Password</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Sign In - BookHub{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h2>User Login</h2>
-    {% if message %}
-    <p style="color:green; font-weight:500;">{{ message }}</p>
-    {% endif %}
-    <form action="/user_login" method="POST">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to your BookHub account</p>
+            </div>
+            
+            {% if message %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                {{ message }}
+            </div>
+            {% endif %}
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('user_login') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                
+                <div class="form-options">
+                    <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{{ url_for('user_signup') }}">Create One</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,124 +1,117 @@
 {% extends "base.html" %}
 
-{% block title %}Shopping Cart{% endblock %}
-
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<a href="/user_dashboard">User Dashboard</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Shopping Cart - BookHub{% endblock %}
 
 {% block content %}
-<div class="cart-container">
-    {% for item in data %}
-    <div class="cart-item" data-stock="{{ item.stock }}" data-max-stock="{{ item.max_stock }}">
-        <img src="{{ item.image }}" alt="{{ item.name }}">
-        <div class="details">
-            <h3>{{ item.name }}</h3>
-            <p>Price per item: {{ item.price_per_unit }}/-</p>
-            <div class="quantity-control">
-                <p>Quantity:</p>
-                <a href="/update_cart/{{ item.product_id }}/{{ user_id }}/decrease" class="cart-link decrease">-</a>
-                <span class="quantity">{{ item.quantity }}</span>
-                <a href="/update_cart/{{ item.product_id }}/{{ user_id }}/increase" class="cart-link increase">+</a>
-            </div>
-            <p class="price total-price">Total: {{ item.total_price }}/-</p>
-        </div>
-        <a href="/remove_cart_item/{{ item.product_id }}/{{ user_id }}" class="cart-link">
-            <button>Remove</button>
-        </a>
+<div class="container">
+    <div class="cart-header">
+        <h1>Shopping Cart</h1>
+        <p>Review your items and proceed to checkout</p>
     </div>
-    {% endfor %}
-    <div class="total" id="grand-total">Grand Total: {{ total }}/-</div>
-    <button class="checkout-btn" onclick="pay()">Proceed to Checkout</button>
+
+    <div class="cart-layout">
+        {% if data %}
+            <div class="cart-items-section">
+                {% for item in data %}
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="{{ item.image }}" alt="{{ item.name }}">
+                    </div>
+                    
+                    <div class="cart-item-details">
+                        <h3 class="item-title">{{ item.name }}</h3>
+                        <p class="item-price">₹{{ item.price_per_unit }} per item</p>
+                        
+                        <div class="quantity-controls">
+                            <span>Quantity:</span>
+                            <div class="quantity-buttons">
+                                <a href="/update_cart/{{ item.product_id }}/{{ user_id }}/decrease" 
+                                class="quantity-btn decrease" 
+                                data-action="decrease">
+                                    <i class="fas fa-minus"></i>
+                                </a>
+                                <span class="quantity-display" data-current-quantity="{{ item.quantity }}">
+                                    {{ item.quantity }}
+                                </span>
+                                <a href="/update_cart/{{ item.product_id }}/{{ user_id }}/increase" 
+                                class="quantity-btn increase" 
+                                data-action="increase">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <p class="item-total">Total: ₹<span class="total-price">{{ item.total_price }}</span></p>
+                    </div>
+                    
+                    <div class="cart-item-actions">
+                        <a href="/remove_cart_item/{{ item.product_id }}/{{ user_id }}" 
+                        class="remove-btn" 
+                        data-action="remove">
+                            <i class="fa-solid fa-trash-can"></i>
+                            Remove
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-summary">
+                <div class="summary-card">
+                    <h3>Order Summary</h3>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ total }}</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Tax</span>
+                        <span>₹0</span>
+                    </div>
+                    
+                    <div class="summary-divider"></div>
+                    
+                    <div class="summary-row total-row">
+                        <span>Total</span>
+                        <span class="grand-total">₹{{ total }}</span>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-full checkout-btn" id="checkoutBtn">
+                        <i class="fas fa-lock"></i>
+                        Proceed to Checkout
+                    </button>
+                    
+                    <div class="secure-checkout">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure checkout</span>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-cart-container">
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any books to your cart yet. Start shopping to discover amazing books!</p>
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary">
+                        Start Shopping
+                    </a>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline">
+                        Return to Home
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
-<script>
 
-    function updateButtonStates(itemDiv, quantity) {
-        const decBtn = itemDiv.querySelector('.decrease');
-        const incBtn = itemDiv.querySelector('.increase');
-        const maxStock = parseInt(itemDiv.dataset.maxStock);
-
-        decBtn.style.cursor = quantity <= 1 ? 'not-allowed' : 'pointer';
-        decBtn.style.pointerEvents = quantity <= 1 ? 'none' : 'auto';
-        decBtn.style.opacity = quantity <= 1 ? '0.5' : '1';
-
-        incBtn.style.cursor = quantity >= maxStock ? 'not-allowed' : 'pointer';
-        incBtn.style.pointerEvents = quantity >= maxStock ? 'none' : 'auto';
-        incBtn.style.opacity = quantity >= maxStock ? '0.5' : '1';
-    }
-
-    document.querySelectorAll('.cart-link').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const itemDiv = this.closest('.cart-item');
-            const quantitySpan = itemDiv.querySelector('.quantity');
-            const totalPriceSpan = itemDiv.querySelector('.total-price');
-            const grandTotalSpan = document.getElementById('grand-total');
-
-            fetch(this.href, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        if (data.quantity !== undefined) {
-                            quantitySpan.textContent = data.quantity;
-                            totalPriceSpan.textContent = 'Total: ' + data.total_price + '/-';
-                            grandTotalSpan.textContent = 'Grand Total: ' + data.grand_total + '/-';
-                            itemDiv.dataset.stock = data.stock;
-                            updateButtonStates(itemDiv, data.quantity);
-                        } else {
-                            itemDiv.remove();
-                            grandTotalSpan.textContent = 'Grand Total: ' + data.grand_total + '/-';
-                        }
-                    }
-                }).catch(err => console.error(err));
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll('.cart-item').forEach(itemDiv => {
-            const quantity = parseInt(itemDiv.querySelector('.quantity').textContent.trim());
-            updateButtonStates(itemDiv, quantity);
-        });
-    });
-
-    function pay() {
-        const grandTotalText = document.getElementById('grand-total').textContent;
-        const totalMatch = grandTotalText.match(/\d+/);
-        const total = totalMatch ? parseInt(totalMatch[0]) : 0;
-
-        if (!total || total <= 0) {
-            alert("Cart is empty or invalid total.");
-            return;
-        }
-
-        const options = {
-            key: "rzp_test_RTMUKCN9huQkLG",
-            amount: total * 100,
-            currency: "INR",
-            name: "Book Store",
-            description: "Payment for Books",
-            image: "{{ url_for('static', filename='images/logo.png') }}",
-            handler: function (response) {
-                fetch("/payment_success", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({ razorpay_payment_id: response.razorpay_payment_id, userid: userId })
-                }).then(() => window.location.href = "/user_dashboard")
-                    .catch(err => console.error("Payment error:", err));
-            },
-            prefill: { contact: "+91 6301866127" },
-            theme: { color: "green" }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.on("payment.failed", function () { alert("Payment Failed!"); });
-        rzp.open();
-    }
-</script>
+{% if data %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
 {% endblock %}

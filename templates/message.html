@@ -1,14 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Message{% endblock %}
-
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Message - BookHub{% endblock %}
 
 {% block content %}
-<div class="message-box">
-    <p>{{ message }}</p>
+<div class="container">
+    <div class="message-container">
+        <div class="message-card">
+            <div class="message-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <h2 class="message-title">Notification</h2>
+            <p class="message-text">{{ message }}</p>
+            <div class="message-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-primary">
+                    <i class="fas fa-home"></i>
+                    Go Home
+                </a>
+                <button onclick="history.back()" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Go Back
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

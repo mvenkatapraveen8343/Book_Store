@@ -1,18 +1,109 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
-
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<a href="/add_products">Add Products</a>
-<a href="/manage_products">Manage Products</a>
-<a href="/admin_logout">Logout</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Admin Dashboard - BookHub{% endblock %}
 
 {% block content %}
-<h1>Welcome to My Book Store</h1>
-<p>Click the menu button to access admin options.</p>
-<img src="{{url_for('static',filename='images/home_image.png')}}" alt="Content Image">
-<p>Explore our platform for amazing features and seamless user experience.</p>
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back, {{ admin }}! Manage your bookstore efficiently.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon total-books">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Books</h3>
+                <span class="stat-number">{{ total_books }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon low-stock">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Low Stock</h3>
+                <span class="stat-number">{{ low_stock_books }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon category">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Categories</h3>
+                <span class="stat-number">{{ total_categories }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon revenue">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Users</h3>
+                <span class="stat-number">{{ total_users }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions-section">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{{ url_for('add_products') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h3>Add New Book</h3>
+                <p>Add a new book to your collection</p>
+            </a>
+            
+            <a href="{{ url_for('manage_products') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <h3>Manage Books</h3>
+                <p>View and manage all books</p>
+            </a>
+            
+            <a href="{{ url_for('admin_dashboard') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>User Management</h3>
+                <p>Manage registered users</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="activity-section">
+        <h2>Recent Books Added</h2>
+        <div class="activity-list">
+            {% for book in recent_books %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="activity-content">
+                    <p><strong>New book added</strong> - "{{ book[1] }}"</p>
+                    <span class="activity-time">₹{{ book[4] }}</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <p>No books added yet</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

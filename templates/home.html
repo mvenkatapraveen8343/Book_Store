@@ -1,18 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
-
-{% block sidebar_links %}
-<a href="{{ url_for('admin_signup') }}">Admin Signup</a>
-<a href="{{ url_for('admin_login') }}">Admin Login</a>
-<a href="{{ url_for('user_signup') }}">User Signup</a>
-<a href="{{ url_for('user_login') }}">User Login</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Welcome to BookHub - Modern Book Store{% endblock %}
 
 {% block content %}
-<h1>Welcome to my Book Store</h1>
-<p>Click the menu button to access login options.</p>
-<img src="{{ url_for('static',filename='images/home_image.png') }}" alt="Content Image" style="width:80%;max-width:600px;margin-top:20px;border-radius:10px;">
-<p>Explore our platform for amazing features and seamless user experience.</p>
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Discover Your Next Favorite Book</h1>
+                <p class="hero-description">Explore thousands of books across all genres. From bestsellers to hidden gems, find your perfect read with BookHub.</p>
+                <div class="hero-buttons">
+                    {% if 'user_id' in session %}
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-shop btn-large">
+                        <i class="fas fa-shopping-bag"></i>
+                        Continue Shopping
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-shop btn-large">
+                        <i class="fas fa-shopping-bag"></i>
+                        Start Shopping
+                    </a>
+                    <a href="{{ url_for('user_signup') }}" class="btn btn-join btn-large">
+                        <i class="fas fa-user-plus"></i>
+                        Join Now
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="admin-access">
+                    <p>Are you an admin? <a href="{{ url_for('admin_login') }}">Access Admin Panel</a></p>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/home_image.png') }}" alt="Book Collection" class="hero-img" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why Choose BookHub?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <h3>Fast Delivery</h3>
+                <p>Get your books delivered quickly with our reliable shipping partners.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3>Best Prices</h3>
+                <p>Enjoy competitive prices and regular discounts on all your favorite books.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>24/7 Support</h3>
+                <p>Our customer support team is always here to help you with any questions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="categories">
+    <div class="container">
+        <h2 class="section-title">Popular Categories</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <i class="fas fa-magic"></i>
+                <span>Fiction</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-flask"></i>
+                <span>Science</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-heart"></i>
+                <span>Romance</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-user-secret"></i>
+                <span>Mystery</span>
+            </div>
+            <div class="category-card">
+                <i class="fas fa-rocket"></i>
+                <span>Sci-Fi</span>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

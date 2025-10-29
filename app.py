@@ -7,9 +7,8 @@ import random
 import base64
 
 app = Flask(__name__)
-app.secret_key = "Praveen"
-app.permanent_session_lifetime = timedelta(minutes=15)
-
+app.secret_key = "BookHub_Secret_Key_2024"
+app.permanent_session_lifetime = timedelta(minutes=60)
 
 db_config = {
     'host': 'localhost',
@@ -27,6 +26,7 @@ def get_connection():
 def db_init():
     conn = get_connection()
     cursor = conn.cursor()
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Products(
             Product_ID INT PRIMARY KEY AUTO_INCREMENT,
@@ -128,7 +128,35 @@ def admin_login():
 def admin_dashboard():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html', admin=session['admin_name'])
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT COUNT(*) FROM Products')
+    total_books = cursor.fetchone()[0]
+    
+    cursor.execute('SELECT COUNT(*) FROM Products WHERE Stock < 5')
+    low_stock_books = cursor.fetchone()[0]
+    
+    cursor.execute('SELECT COUNT(DISTINCT Category) FROM Products')
+    total_categories = cursor.fetchone()[0]
+    
+    cursor.execute('SELECT COUNT(*) FROM Users')
+    total_users = cursor.fetchone()[0]
+    
+    cursor.execute('SELECT * FROM Products ORDER BY Product_ID DESC LIMIT 3')
+    recent_books = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return render_template('admin_dashboard.html', 
+                         admin=session['admin_name'],
+                         total_books=total_books,
+                         low_stock_books=low_stock_books,
+                         total_categories=total_categories,
+                         total_users=total_users,
+                         recent_books=recent_books)
 
 @app.route('/add_products', methods=['GET', 'POST'])
 def add_products():
@@ -361,7 +389,6 @@ def reset_password():
     otp = session['reset_otp']
     return render_template('reset_password.html', email=email, otp=otp)
 
-
 @app.route('/user_dashboard')
 def user_dashboard():
     if 'user_id' not in session:
@@ -413,11 +440,18 @@ def add_to_cart(p_id):
 
     cursor.execute("SELECT Stock FROM Products WHERE Product_ID=%s", (p_id,))
     new_stock = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT SUM(Quantity) FROM Cart WHERE User_ID=%s", (user_id,))
+    cart_count = cursor.fetchone()[0] or 0
 
     cursor.close()
     conn.close()
 
-    return jsonify({"success": True, "stock": new_stock})
+    return jsonify({
+        "success": True, 
+        "stock": new_stock, 
+        "cart_count": cart_count
+    })
 
 @app.route('/update_cart/<int:p_id>/<int:user_id>/<string:action>')
 def update_cart(p_id, user_id, action):
@@ -428,6 +462,7 @@ def update_cart(p_id, user_id, action):
 
     conn = get_connection()
     cursor = conn.cursor()
+    
     cursor.execute("SELECT Quantity FROM Cart WHERE Product_ID=%s AND User_ID=%s", (p_id, user_id))
     cart_row = cursor.fetchone()
     cursor.execute("SELECT Stock, Actual_Price, Discount_Price FROM Products WHERE Product_ID=%s", (p_id,))
@@ -463,8 +498,12 @@ def update_cart(p_id, user_id, action):
 
     cursor.execute("SELECT Quantity FROM Cart WHERE Product_ID=%s AND User_ID=%s", (p_id, user_id))
     new_cart = cursor.fetchone()
+    
     cursor.execute("SELECT SUM((p.Actual_Price - IFNULL(p.Discount_Price, 0)) * c.Quantity) FROM Cart c JOIN Products p ON c.Product_ID=p.Product_ID WHERE c.User_ID=%s", (user_id,))
     grand_total = cursor.fetchone()[0] or 0
+    
+    cursor.execute("SELECT SUM(Quantity) FROM Cart WHERE User_ID=%s", (user_id,))
+    cart_count = cursor.fetchone()[0] or 0
 
     cursor.close()
     conn.close()
@@ -473,9 +512,21 @@ def update_cart(p_id, user_id, action):
         if new_cart:
             new_qty = new_cart[0]
             total_price = price_per_unit * new_qty
-            return jsonify(success=True, quantity=new_qty, total_price=total_price, grand_total=grand_total, stock=stock)
+            return jsonify(
+                success=True, 
+                quantity=new_qty, 
+                total_price=total_price, 
+                grand_total=grand_total,
+                cart_count=cart_count,
+                stock=stock
+            )
         else:
-            return jsonify(success=True, removed=True, grand_total=grand_total)
+            return jsonify(
+                success=True, 
+                removed=True, 
+                grand_total=grand_total,
+                cart_count=cart_count
+            )
     return redirect(url_for('shopping_cart', user_id=user_id))
 
 @app.route('/remove_cart_item/<int:p_id>/<int:user_id>')
@@ -487,30 +538,33 @@ def remove_cart_item(p_id, user_id):
 
     conn = get_connection()
     cursor = conn.cursor()
+    
     cursor.execute("SELECT Quantity FROM Cart WHERE Product_ID=%s AND User_ID=%s", (p_id, user_id))
     cart_row = cursor.fetchone()
+    
     if cart_row:
         quantity = cart_row[0]
         cursor.execute("DELETE FROM Cart WHERE Product_ID=%s AND User_ID=%s", (p_id, user_id))
         cursor.execute("UPDATE Products SET Stock = Stock + %s WHERE Product_ID=%s", (quantity, p_id))
+    
     conn.commit()
 
-    cursor.execute("""
-        SELECT SUM(
-            (SELECT Actual_Price - IFNULL(Discount_Price, 0) 
-             FROM Products 
-             WHERE Products.Product_ID = Cart.Product_ID) * Quantity
-        ) 
-        FROM Cart 
-        WHERE User_ID = %s
-    """, (user_id,))
+    cursor.execute("SELECT SUM((p.Actual_Price - IFNULL(p.Discount_Price, 0)) * c.Quantity) FROM Cart c JOIN Products p ON c.Product_ID=p.Product_ID WHERE c.User_ID=%s", (user_id,))
     grand_total = cursor.fetchone()[0] or 0
+    
+    cursor.execute("SELECT SUM(Quantity) FROM Cart WHERE User_ID=%s", (user_id,))
+    cart_count = cursor.fetchone()[0] or 0
 
     cursor.close()
     conn.close()
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return jsonify(success=True, removed=True, grand_total=grand_total)
+        return jsonify(
+            success=True, 
+            removed=True, 
+            grand_total=grand_total,
+            cart_count=cart_count
+        )
     return redirect(url_for('shopping_cart', user_id=user_id))
 
 @app.route('/shopping_cart/<int:user_id>')
@@ -557,8 +611,9 @@ def shopping_cart(user_id):
 def payment_success():
     user_id = request.form.get('userid')
     payment_id = request.form.get('razorpay_payment_id')
-    if not user_id or not payment_id:
-        return render_template('message.html', message="Invalid payment confirmation")
+    
+    if not user_id:
+        return jsonify({"success": False, "message": "Invalid user"})
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -567,7 +622,7 @@ def payment_success():
     cursor.close()
     conn.close()
 
-    return redirect(url_for('user_dashboard'))
+    return jsonify({"success": True, "message": "Payment successful"})
 
 if __name__ == "__main__":
     app.run(debug=True)

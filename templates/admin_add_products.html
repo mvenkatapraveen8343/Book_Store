@@ -1,50 +1,105 @@
 {% extends "base.html" %}
 
-{% block title %}{% if update %}Update Product{% else %}Add Product{% endif %}{% endblock %}
-{% block sidebar_links %}
-<a href="/home">Home</a>
-<a href="/admin_dashboard">Admin Dashboard</a>
-<a href="/manage_products">Manage Products</a>
-<a href="/admin_logout">Logout</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}{% if update %}Update Book{% else %}Add New Book{% endif %} - BookHub{% endblock %}
+
 {% block content %}
-<h1>{% if update %}Update Product{% else %}Add New Product{% endif %}</h1>
-{% if message %}
-<p style="color: green; font-weight: 500; padding: 10px;">{{ message }}</p>
-{% endif %}
-<div class="form-container">
-    <form action="{% if update %}/update_product/{{ product.id }}{% else %}/add_products{% endif %}" method="POST"
-        enctype="multipart/form-data">
-        <input type="text" name="product_name" placeholder="Book Name" required
-            value="{% if update %}{{ product.name }}{% endif %}">
-        <input type="file" name="product_image" accept="image/*" {% if not update %}required{% endif %}>
-        <select name="product_genre" required>
-            <option value="" disabled {% if not update %}selected{% endif %}>Select Book Genre</option>
-            <option value="Fiction" {% if update and product.category=="Fiction" %}selected{% endif %}>Fiction
-            </option>
-            <option value="Non-Fiction" {% if update and product.category=="Non-Fiction" %}selected{% endif %}>
-                Non-Fiction</option>
-            <option value="Mystery" {% if update and product.category=="Mystery" %}selected{% endif %}>Mystery
-            </option>
-            <option value="Science Fiction" {% if update and product.category=="Science Fiction" %}selected{% endif %}>
-                Science Fiction</option>
-            <option value="Fantasy" {% if update and product.category=="Fantasy" %}selected{% endif %}>Fantasy
-            </option>
-            <option value="Biography" {% if update and product.category=="Biography" %}selected{% endif %}>Biography
-            </option>
-            <option value="History" {% if update and product.category=="History" %}selected{% endif %}>History
-            </option>
-            <option value="Self-Help" {% if update and product.category=="Self-Help" %}selected{% endif %}>Self-Help
-            </option>
-        </select>
-        <input type="number" name="actual_price" placeholder="Actual Price" required
-            value="{% if update %}{{ product.actual_price }}{% endif %}">
-        <input type="number" name="discount_price" placeholder="Discounted Price"
-            value="{% if update %}{{ product.discount_price }}{% endif %}">
-        <input type="number" name="quantity" placeholder="Stock" required
-            value="{% if update %}{{ product.stock }}{% endif %}">
-        <button type="submit">{% if update %}Update Book{% else %}Add Book{% endif %}</button>
-    </form>
+<div class="container">
+    <div class="page-header">
+        <h1>{% if update %}Update Book{% else %}Add New Book{% endif %}</h1>
+        <p>{% if update %}Modify book details{% else %}Add a new book to your collection{% endif %}</p>
+    </div>
+
+    <div class="form-container">
+        {% if message %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            {{ message }}
+        </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{% if update %}/update_product/{{ product.id }}{% else %}/add_products{% endif %}" method="POST" enctype="multipart/form-data" class="product-form" id="productForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="product_name">Book Name *</label>
+                    <input type="text" id="product_name" name="product_name" required 
+                           value="{% if update %}{{ product.name }}{% endif %}" 
+                           placeholder="Enter book title">
+                </div>
+
+                <div class="form-group">
+                    <label for="product_genre">Genre *</label>
+                    <select id="product_genre" name="product_genre" required>
+                        <option value="" disabled {% if not update %}selected{% endif %}>Select Book Genre</option>
+                        <option value="Fiction" {% if update and product.category=="Fiction" %}selected{% endif %}>Fiction</option>
+                        <option value="Non-Fiction" {% if update and product.category=="Non-Fiction" %}selected{% endif %}>Non-Fiction</option>
+                        <option value="Mystery" {% if update and product.category=="Mystery" %}selected{% endif %}>Mystery</option>
+                        <option value="Science Fiction" {% if update and product.category=="Science Fiction" %}selected{% endif %}>Science Fiction</option>
+                        <option value="Fantasy" {% if update and product.category=="Fantasy" %}selected{% endif %}>Fantasy</option>
+                        <option value="Biography" {% if update and product.category=="Biography" %}selected{% endif %}>Biography</option>
+                        <option value="History" {% if update and product.category=="History" %}selected{% endif %}>History</option>
+                        <option value="Self-Help" {% if update and product.category=="Self-Help" %}selected{% endif %}>Self-Help</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="actual_price">Actual Price (₹) *</label>
+                    <input type="number" id="actual_price" name="actual_price" required 
+                           value="{% if update %}{{ product.actual_price }}{% endif %}" 
+                           placeholder="Enter actual price" min="1" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="discount_price">Discounted Price (₹)</label>
+                    <input type="number" id="discount_price" name="discount_price" 
+                           value="{% if update %}{{ product.discount_price }}{% endif %}" 
+                           placeholder="Enter discounted price" min="0" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Stock Quantity *</label>
+                    <input type="number" id="quantity" name="quantity" required 
+                           value="{% if update %}{{ product.stock }}{% endif %}" 
+                           placeholder="Enter stock quantity" min="0">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="product_image">Book Cover Image {% if not update %}*{% endif %}</label>
+                    <div class="file-upload">
+                        <input type="file" id="product_image" name="product_image" 
+                               accept="image/*" {% if not update %}required{% endif %}>
+                        <div class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Choose book cover image</span>
+                        </div>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        {% if update %}
+                        <p>Current image will be kept if no new image is selected</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">
+                    <i class="fas fa-save"></i>
+                    {% if update %}Update Book{% else %}Add Book{% endif %}
+                </button>
+                <a href="{{ url_for('manage_products') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Manage Books
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

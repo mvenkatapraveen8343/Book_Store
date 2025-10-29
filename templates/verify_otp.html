@@ -1,26 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}Verify OTP{% endblock %}
-
-{% block sidebar_links %}
-<a href="/admin_login">Admin Login</a>
-<a href="/user_signup">User Signup</a>
-<a href="/user_login">User Login</a>
-<button type="button" onclick="toggleSidebar()">Close</button>
-{% endblock %}
+{% block title %}Verify OTP - BookHub{% endblock %}
 
 {% block content %}
-<div class="verify-otp-container">
-    <h2>Verify OTP</h2>
-    <p>OTP sent to {{email}}</p>
-    <form action="/verify_otp" method="POST">
-        <input type="hidden" name="name" value="{{name}}" required>
-        <input type="hidden" name="email" value="{{email}}" required>
-        <input type="hidden" name="mobile" value="{{mobile}}" required>
-        <input type="hidden" name="password" value="{{password}}" required>
-        <input type="hidden" name="otp" value="{{otp}}" required>
-        <input type="text" name="cotp" placeholder="OTP" required>
-        <button type="submit">Sign up</button>
-    </form>
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="otp-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h2>Verify Your Email</h2>
+                <p>We sent a 6-digit code to <strong>{{ email }}</strong></p>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('verify_otp') }}" method="POST" class="auth-form">
+                <input type="hidden" name="name" value="{{ name }}">
+                <input type="hidden" name="email" value="{{ email }}">
+                <input type="hidden" name="mobile" value="{{ mobile }}">
+                <input type="hidden" name="password" value="{{ password }}">
+                <input type="hidden" name="otp" value="{{ otp }}">
+                
+                <div class="form-group">
+                    <label for="cotp">Enter OTP *</label>
+                    <input type="text" id="cotp" name="cotp" required placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-check-circle"></i>
+                    Verify & Create Account
+                </button>
+            </form>
+            
+            <div class="otp-help">
+                <p>Didn't receive the code? <a href="{{ url_for('user_signup') }}">Resend OTP</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
