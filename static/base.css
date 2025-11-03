@@ -1651,7 +1651,7 @@ p {
     box-shadow: var(--shadow);
 }
 
-.empty-state i {
+.empty-state i.fa-book-open {
     font-size: 4rem;
     color: var(--text-light);
     margin-bottom: 1.5rem;

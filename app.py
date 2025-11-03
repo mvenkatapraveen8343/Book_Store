@@ -30,7 +30,7 @@ def db_init():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Products(
             Product_ID INT PRIMARY KEY AUTO_INCREMENT,
-            Product_Name VARCHAR(30) NOT NULL,
+            Product_Name VARCHAR(100) NOT NULL,
             Product_Image LONGBLOB NOT NULL,
             Category VARCHAR(30) NOT NULL,
             Actual_Price INT NOT NULL,
